@@ -1,10 +1,13 @@
 #!/bin/bash
-# if nginx configs, move to volume
-mkdir -p /etc/nginx/conf.d/grafana
-if [[ "$(ls -A /nginx)" ]]; then
-    cp /nginx/* /etc/nginx/conf.d/grafana
-else
-    echo "ERROR: No nginx conf provided! Using default http config."
-    cp /nginx-http.conf /etc/nginx/conf.d/grafana/nginx-http.conf
-fi
+# init postgres database if nonexistent, then start
+PGPASSWORD=${GF_DATABASE_PASSWORD:-password} psql -w -h "${GF_DATABASE_HOST:-postgres}" \
+        -p "${GF_DATABASE_PORT:-5432}" \
+        -U "${GF_DATABASE_USER:-root}" \
+        "${GF_DATABASE_NAME:-grafana}" 2> /dev/null || \
+    PGPASSWORD=${GF_DATABASE_PASSWORD:-password} psql -h "${GF_DATABASE_HOST:-postgres}" \
+        -p "${GF_DATABASE_PORT:-5432}" \
+        -U "${GF_DATABASE_USER:-root}" \
+        -d "${POSTGRES_DB:-root}" \
+        -c "create database ${GF_DATABASE_NAME:-grafana};"
+
 /run.sh

@@ -1,9 +1,8 @@
-ARG GRAFANA_IMAGE=grafana/grafana:latest
-FROM ${GRAFANA_IMAGE}
+ARG GRAFANA_VERSION=9.3.6
+FROM grafana/grafana:${GRAFANA_VERSION}
 
 USER root
-RUN mkdir -p /etc/nginx/conf.d/ && \
-    chown -R grafana /etc/nginx 
+RUN apk add postgresql-client
 
 USER grafana
 COPY datasources/* /etc/grafana/provisioning/datasources
